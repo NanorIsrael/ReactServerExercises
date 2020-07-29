@@ -1,50 +1,85 @@
 const express = require('express');
-
+const mongoose = require('mongoose');
 const leadersRouter = express.Router();
-
+const Leaders = require('./../models/leaders')
 const bodyParser = require('body-parser');
+const { findById } = require('./../models/leaders');
 
 
 leadersRouter.use(bodyParser.json());
 
 leadersRouter.route('/')
-.all((req,res,next)=>{
-    res.statusCode=200                      
-    res.setHeader('Content-type','text/plain')
-    next();
-})
 .get((req,res,next)=>{
-    res.end('Information on all leaders will be sent to you')
-})
+    Leaders.find({})
+    .then((leaders)=>{
+        res.statusCode=200;
+        res.setHeader('content-type','application/json')
+        res.json(leaders)
+    },(err)=>next(err))
+    .catch((err)=>console.log(err))
+    })
+
 .post((req,res,next)=>{
-    res.end(`You have added leader ${req.body.name}`)
+    Leaders.create(req.body)
+    .then((leader)=>{
+        res.statusCode=200;
+        res.setHeader('content-type','application/json')
+        res.json(leader)
+    },(err)=>next(err))
+    .catch((err)=>console.log(err))
+
 })
 .put((req,res,next)=>{
     res.statusCode = 404;
-    res.end('Not found ')
+    res.end('Put not supported on /leaders ')
 })
 .delete((req,res,next)=>{
-    res.end(`you are have deleted leader` );
+   Leaders.remove({})
+   .then((resp)=>{
+    res.statusCode=200;
+    res.setHeader('content-type','application/json')
+    res.json(resp)
+},(err)=>next(err))
+.catch((err)=>console.log(err))
+
 })
 
 leadersRouter.route('/:leaderId')
-.all((req,res,next)=>{
-    res.statusCode=200
-    res.setHeader('Content-type','text/plain')
-    next();
-})
+
 .get((req,res,next)=>{
-    res.end('you have selected leader : '+ req.params.leaderId)
+    Leaders.findById(req.params.leaderId)
+    .then((leader)=>{
+        res.statusCode=200;
+        res.setHeader('content-type','application/json')
+        res.json(leader)
+    },(err)=>next(err))
+    .catch((err)=>console.log(err))
+
 })
 .post((req,res,next)=>{
     res.statusCode = 404;
-    res.end('Not found ')
+    res.end('Post not supported on /leaders/: '+req.params.leaderId)
 })
 .put((req,res,next)=>{
-    res.end(`You have updated leader ${req.params.leaderId} info succesfully`)
+   Leaders.findByIdAndUpdate(req.params.leaderId,{
+       $set:req.body
+   },{new:true})
+   .then((leader)=>{
+    res.statusCode=200;
+    res.setHeader('content-type','application/json')
+    res.json(leader)
+},(err)=>next(err))
+.catch((err)=>console.log(err))
+
 
 })
 .delete((req,res,next)=>{
-    res.end(`you are removed leader ${req.params.leaderId}` );
+    Leaders.findByIdAndRemove(req.params.leaderId)
+    .then((resp)=>{
+        res.statusCode=200;
+        res.setHeader('content-type','application/json')
+        res.json(resp)
+    },(err)=>next(err))
+    .catch((err)=>console.log(err))
 })
 module.exports = leadersRouter;
