@@ -1,5 +1,7 @@
 var express = require('express');
 var promoRouter  = express.Router();
+const authenticate = require('../authenticate');
+
 const Promotions = require('./../models/promotions');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
@@ -17,7 +19,7 @@ promoRouter.route('/')
         .catch((err)=>console.log(err))
 })
 
-.post((req, res, next)=>{
+.post(authenticate.verifyUser,(req, res, next)=>{
                 Promotions.create(req.body)
                 .then((promotion)=>{       
                         res.statusCode=200,
@@ -26,11 +28,11 @@ promoRouter.route('/')
                 },(err)=>next(err))
                 .catch((err)=>console.log(err))
 })
-.put((req,res,next)=>{
+.put(authenticate.verifyUser,(req,res,next)=>{
         res.statusCode=404;
         res.end('Put not supported on  /promotions');
 })
-.delete(function(req, res, next){
+.delete(authenticate.verifyUser,function(req, res, next){
         Promotions.remove({})
         .then((resp)=>{
                 res.statusCode=200,
@@ -41,7 +43,7 @@ promoRouter.route('/')
 });
 
 promoRouter.route('/:promoId')
-.get((req,res,next)=>{
+.get(authenticate.verifyUser,(req,res,next)=>{
         Promotions.findById(req.params.promoId)
         .then((promotion)=>{
                 res.statusCode=200,
@@ -50,12 +52,12 @@ promoRouter.route('/:promoId')
         },(err)=>next(err))
         .catch((err)=>console.log(err))
 })
-.post((req,res,next)=>{
+.post(authenticate.verifyUser,(req,res,next)=>{
         res.statusCode=404;
         res.end('Post operation is not supported on /promotions/:'+req.params.promoId)
 })
 
-.put((req, res, next)=>{
+.put(authenticate.verifyUser,(req, res, next)=>{
         Promotions.findByIdAndUpdate(req.params.promoId,{
                 $set:req.body
         },{new:true})
@@ -67,7 +69,7 @@ promoRouter.route('/:promoId')
         .catch((err)=>console.log(err))
 })
 
-.delete(function(req, res, next){
+.delete(authenticate.verifyUser,function(req, res, next){
         Promotions.findByIdAndRemove(req.params.promoId)
         .then((resp)=>{
                 res.statusCode=200,

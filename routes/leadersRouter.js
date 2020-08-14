@@ -1,7 +1,10 @@
 const express = require('express');
 const mongoose = require('mongoose');
+const authenticate = require('../authenticate');
+
 const leadersRouter = express.Router();
 const Leaders = require('./../models/leaders')
+
 const bodyParser = require('body-parser');
 const { findById } = require('./../models/leaders');
 
@@ -19,7 +22,7 @@ leadersRouter.route('/')
     .catch((err)=>console.log(err))
     })
 
-.post((req,res,next)=>{
+.post(authenticate.verifyUser,(req,res,next)=>{
     Leaders.create(req.body)
     .then((leader)=>{
         res.statusCode=200;
@@ -29,11 +32,11 @@ leadersRouter.route('/')
     .catch((err)=>console.log(err))
 
 })
-.put((req,res,next)=>{
+.put(authenticate.verifyUser,(req,res,next)=>{
     res.statusCode = 404;
     res.end('Put not supported on /leaders ')
 })
-.delete((req,res,next)=>{
+.delete(authenticate.verifyUser,(req,res,next)=>{
    Leaders.remove({})
    .then((resp)=>{
     res.statusCode=200;
@@ -46,7 +49,7 @@ leadersRouter.route('/')
 
 leadersRouter.route('/:leaderId')
 
-.get((req,res,next)=>{
+.get(authenticate.verifyUser,(req,res,next)=>{
     Leaders.findById(req.params.leaderId)
     .then((leader)=>{
         res.statusCode=200;
@@ -56,11 +59,11 @@ leadersRouter.route('/:leaderId')
     .catch((err)=>console.log(err))
 
 })
-.post((req,res,next)=>{
+.post(authenticate.verifyUser,(req,res,next)=>{
     res.statusCode = 404;
     res.end('Post not supported on /leaders/: '+req.params.leaderId)
 })
-.put((req,res,next)=>{
+.put(authenticate.verifyUser,(req,res,next)=>{
    Leaders.findByIdAndUpdate(req.params.leaderId,{
        $set:req.body
    },{new:true})
@@ -73,7 +76,7 @@ leadersRouter.route('/:leaderId')
 
 
 })
-.delete((req,res,next)=>{
+.delete(authenticate.verifyUser,(req,res,next)=>{
     Leaders.findByIdAndRemove(req.params.leaderId)
     .then((resp)=>{
         res.statusCode=200;
